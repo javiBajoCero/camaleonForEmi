@@ -3,7 +3,7 @@
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
-#include <EEPROM.h>
+
 //https://tttapa.github.io/ESP8266/Chap10%20-%20Simple%20Web%20Server.html
 //https://randomnerdtutorials.com/display-images-esp32-esp8266-web-server/
 #include "imagesStringified.h"
@@ -72,34 +72,6 @@ String toStringIp(IPAddress ip) {
   }
   res += String(((ip >> 8 * 3)) & 0xFF);
   return res;
-}
-
-/** Load WLAN credentials from EEPROM */
-void loadCredentials() {
-  EEPROM.begin(512);
-  EEPROM.get(0, ssid);
-  EEPROM.get(0 + sizeof(ssid), password);
-  char ok[2 + 1];
-  EEPROM.get(0 + sizeof(ssid) + sizeof(password), ok);
-  EEPROM.end();
-  if (String(ok) != String("OK")) {
-    ssid[0] = 0;
-    password[0] = 0;
-  }
-  Serial.println("Recovered credentials:");
-  Serial.println(ssid);
-  Serial.println(strlen(password) > 0 ? "********" : "<no password>");
-}
-
-/** Store WLAN credentials to EEPROM */
-void saveCredentials() {
-  EEPROM.begin(512);
-  EEPROM.put(0, ssid);
-  EEPROM.put(0 + sizeof(ssid), password);
-  char ok[2 + 1] = "OK";
-  EEPROM.put(0 + sizeof(ssid) + sizeof(password), ok);
-  EEPROM.commit();
-  EEPROM.end();
 }
 
 /** Handle root or redirect to captive portal */
@@ -347,44 +319,10 @@ void setup() {
   server.onNotFound(      handleNotFound);
   server.begin(); // Web server start
   Serial.println("HTTP server started");
-  loadCredentials(); // Load WLAN credentials from network
-  connect = strlen(ssid) > 0; // Request WLAN connect if there is a SSID
 }
 
-void connectWifi() {
-  Serial.println("Connecting as wifi client...");
-  WiFi.disconnect();
-  WiFi.begin(ssid, password);
-  int connRes = WiFi.waitForConnectResult();
-  Serial.print("connRes: ");
-  Serial.println(connRes);
-}
 
 void loop() {
-  if (connect) {
-    Serial.println("Connect requested");
-    connect = false;
-    connectWifi();
-    lastConnectTry = millis();
-  }
-  {
-    unsigned int s = WiFi.status();
-    if (s == 0 && millis() > (lastConnectTry + 60000)) {
-      /* If WLAN disconnected and idle try to connect */
-      /* Don't set retry time too low as retry interfere the softAP operation */
-      connect = true;
-    }
-    if (status != s) { // WLAN status change
-      Serial.print("Status: ");
-      Serial.println(s);
-      status = s;
-      if (s == WL_CONNECTED) {
-        /* Just connected to WLAN */
-        Serial.println("");
-        Serial.print("Connected to ");
-        Serial.println(ssid);
-        Serial.print("IP address: ");
-        Serial.println(WiFi.localIP());
 
         // Setup MDNS responder
         if (!MDNS.begin(myHostname)) {
@@ -394,14 +332,7 @@ void loop() {
           // Add service to MDNS-SD
           MDNS.addService("http", "tcp", 80);
         }
-      } else if (s == WL_NO_SSID_AVAIL) {
-        WiFi.disconnect();
-      }
-    }
-    if (s == WL_CONNECTED) {
-      MDNS.update();
-    }
-  }
+  
   // Do work:
   //DNS
   dnsServer.processNextRequest();
