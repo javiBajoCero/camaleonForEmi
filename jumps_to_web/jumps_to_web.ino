@@ -132,25 +132,25 @@ void handleRoot() {
 "  background-color: white; "
 "  color: black; "
 "  border: 2px solid #4CAF50;"
-  "margin-left: auto;"
-  "margin-right: auto;"
+"  border-radius: 12px;"
 "}"
-
-".button1:hover {"
-"  background-color: #4CAF50;"
-"  color: white;"
-"}"
-
 ".button2 {"
 "  background-color: white; "
 "  color: black; "
 "  border: 2px solid #008CBA;"
+"  border-radius: 12px;"
 "}"
 
 ".button3 {"
 "  background-color: white; "
 "  color: #ba2b00; "
 "  border: 2px solid #ba2b00;"
+"  border-radius: 12px;"
+"}"
+
+".button1:hover {"
+"  background-color: #4CAF50;"
+"  color: white;"
 "}"
 
 ".button2:hover {"
@@ -168,6 +168,7 @@ void handleRoot() {
   "display: block;"
   "margin-left: auto;"
   "margin-right: auto;"
+  "  border-radius: 12px;"
 "}"
 
 ".center {"
@@ -179,7 +180,7 @@ void handleRoot() {
 "}"
 "</style>"
 "</head>"
-"<body>"
+"<body style=\"background-color:#e0e3b8;\">"
             );
 
    Page += F("<img "
@@ -220,20 +221,33 @@ void handleRoot() {
 
 Page += F(   
   "<div class=\"center\">"
-    "<button class=\"button button1\">ojo izquierdo</button>"
-    "<button class=\"button button1\">ojo derecho</button>"
+"  <form action=\"/IZQ\" method=\"post\">"
+    "<button class=\"button button1\">OJO</button>"
+"  </form>"
+
+"  <form action=\"/DER\" method=\"post\">"
+    "<button class=\"button button1\">OJO</button>"
+"  </form>"
   "</div>"
   );
   Page += F(   
   "<div class=\"center\">"
-    "<button class=\"button button2\">lazy setup</button>"
-    "<button class=\"button button2\">nervous setup</button>"
-    "<button class=\"button button2\">LSD setup</button>"
+  "  <form action=\"/LAZY\" method=\"post\">"
+    "<button class=\"button button2\">lazy</button>"
+"  </form>"
+"  <form action=\"/NERVOUS\" method=\"post\">"
+    "<button class=\"button button2\">nervous</button>"
+"  </form>"
+"  <form action=\"/LSD\" method=\"post\">"
+    "<button class=\"button button2\">LSD</button>"
+"  </form>"
   "</div>"
   );
     Page += F(   
   "<div class=\"center\">"
-    "<button class=\"button button3\">STOP</button>"
+  "  <form action=\"/STOP\" method=\"post\">"
+        "<button class=\"button button3\">STOP</button>"
+  "  </form>"
   "</div>"
   );
   
@@ -253,83 +267,9 @@ boolean captivePortal() {
   return false;
 }
 
-///** Wifi config page handler */
-//void handleWifi() {
-//  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-//  server.sendHeader("Pragma", "no-cache");
-//  server.sendHeader("Expires", "-1");
-//
-//  String Page;
-//  Page += F(
-//            "<html><head></head><body>"
-//            "<h1>Wifi config</h1>");
-//  if (server.client().localIP() == apIP) {
-//    Page += String(F("<p>You are connected through the soft AP: ")) + softAP_ssid + F("</p>");
-//  } else {
-//    Page += String(F("<p>You are connected through the wifi network: ")) + ssid + F("</p>");
-//  }
-//  Page +=
-//    String(F(
-//             "\r\n<br />"
-//             "<table><tr><th align='left'>SoftAP config</th></tr>"
-//             "<tr><td>SSID ")) +
-//    String(softAP_ssid) +
-//    F("</td></tr>"
-//      "<tr><td>IP ") +
-//    toStringIp(WiFi.softAPIP()) +
-//    F("</td></tr>"
-//      "</table>"
-//      "\r\n<br />"
-//      "<table><tr><th align='left'>WLAN config</th></tr>"
-//      "<tr><td>SSID ") +
-//    String(ssid) +
-//    F("</td></tr>"
-//      "<tr><td>IP ") +
-//    toStringIp(WiFi.localIP()) +
-//    F("</td></tr>"
-//      "</table>"
-//      "\r\n<br />"
-//      "<table><tr><th align='left'>WLAN list (refresh if any missing)</th></tr>");
-//  Serial.println("scan start");
-//  int n = WiFi.scanNetworks();
-//  Serial.println("scan done");
-//  if (n > 0) {
-//    for (int i = 0; i < n; i++) {
-//      Page += String(F("\r\n<tr><td>SSID ")) + WiFi.SSID(i) + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? F(" ") : F(" *")) + F(" (") + WiFi.RSSI(i) + F(")</td></tr>");
-//    }
-//  } else {
-//    Page += F("<tr><td>No WLAN found</td></tr>");
-//  }
-//  Page += F(
-//            "</table>"
-//            "\r\n<br /><form method='POST' action='wifisave'><h4>Connect to network:</h4>"
-//            "<input type='text' placeholder='network' name='n'/>"
-//            "<br /><input type='password' placeholder='password' name='p'/>"
-//            "<br /><input type='submit' value='Connect/Disconnect'/></form>"
-//            "<p>You may want to <a href='/'>return to the home page</a>.</p>"
-//            "<img src="
-//            "</body></html>");
-//  server.send(200, "text/html", Page);
-//  server.client().stop(); // Stop is needed because we sent no content length
-//}
-
-///** Handle the WLAN save form and redirect to WLAN config page again */
-//void handleWifiSave() {
-//  Serial.println("wifi save");
-//  server.arg("n").toCharArray(ssid, sizeof(ssid) - 1);
-//  server.arg("p").toCharArray(password, sizeof(password) - 1);
-//  server.sendHeader("Location", "wifi", true);
-//  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-//  server.sendHeader("Pragma", "no-cache");
-//  server.sendHeader("Expires", "-1");
-//  server.send(302, "text/plain", "");    // Empty content inhibits Content-length header so we have to close the socket ourselves.
-//  server.client().stop(); // Stop is needed because we sent no content length
-//  saveCredentials();
-//  connect = strlen(ssid) > 0; // Request WLAN connect with new credentials if there is a SSID
-//}
-
 void handleNotFound() {
   if (captivePortal()) { // If caprive portal redirect instead of displaying the error page.
+    Serial.println("captive!");
     return;
   }
   String message = F("File Not Found\n\n");
@@ -350,6 +290,36 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
+void handleIZQ() {
+  Serial.println("handleIZQ");
+  handleRoot();
+}
+
+void handleDER() {
+    Serial.println("handleDER");
+    handleRoot();
+}
+
+void handleLAZY() {
+    Serial.println("handleLAZY");
+    handleRoot();
+}
+
+void handleNERVOUS() {
+    Serial.println("handleNERVOUS");
+    handleRoot();
+}
+
+void handleLSD() {
+    Serial.println("handleLSD");
+    handleRoot();
+}
+
+void handleSTOP() {
+    Serial.println("handleSTOP");
+    handleRoot();
+}
+
 void setup() {
   delay(1000);
   Serial.begin(9600);
@@ -368,11 +338,13 @@ void setup() {
 
   /* Setup web pages: root, wifi config pages, SO captive portal detectors and not found. */
   server.on("/",              handleRoot);
- // server.on("/wifi",          handleWifi);
- // server.on("/wifisave",      handleWifiSave);
-  server.on("/generate_204",  handleRoot);  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
-  server.on("/fwlink",        handleRoot);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
-  server.onNotFound(          handleNotFound);
+  server.on("/IZQ",           handleIZQ);
+  server.on("/DER",           handleDER);
+  server.on("/LAZY",          handleLAZY);  
+  server.on("/NERVOUS",       handleNERVOUS);  
+  server.on("/LSD",           handleLSD);  
+  server.on("/STOP",          handleSTOP);  
+  server.onNotFound(      handleNotFound);
   server.begin(); // Web server start
   Serial.println("HTTP server started");
   loadCredentials(); // Load WLAN credentials from network
